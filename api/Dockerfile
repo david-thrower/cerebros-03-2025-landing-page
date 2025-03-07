@@ -1,4 +1,6 @@
-FROM python:3.9-slim # 3.14.0a5-bookworm
+FROM python:3.9-slim 
+
+# 3.14.0a5-bookworm
 
 # Install Rust and Cargo
 # RUN apt-get update && apt-get install -y curl \
