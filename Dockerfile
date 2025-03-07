@@ -4,4 +4,4 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 RUN node --version && npm --version
-ENTRYPOINT ["npm", "run", "dev", "--host", "0.0.0.0" ]
+ENTRYPOINT ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
