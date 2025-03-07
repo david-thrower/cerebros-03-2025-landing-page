@@ -1,88 +1,89 @@
-from sqlalchemy.orm import registry, mapped_column, Mapped
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
-from typing import Optional
-from sqlalchemy import create_engine, Integer, String, Boolean, Text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session, relationship
+import os
 
-app = FastAPI()
-
-# Database setup
-database_url = "sqlite:///./test.db"
-engine = create_engine(database_url)
+# Database configuration
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-mapper_registry = registry()
-Base = mapper_registry.generate_base()
+Base = declarative_base()
 
-# Pydantic model
-class SignUpModel(BaseModel):
-    name: str
-    email: EmailStr
-    phone: Optional[str] = None
-    linkedin: Optional[str] = None
-    use_case: str
-    early_adopter: bool = False
-    tech_partner: bool = False
-    cofounder: bool = False
-    investor: bool = False
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-# Database model
-class User(Base):
+# Database models
+class PartnershipsDB(Base):
+    __tablename__ = "partnerships"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    early_adopter = Column(Boolean)
+    tech_partner = Column(Boolean)
+    cofounder = Column(Boolean)
+    investor = Column(Boolean)
+
+class UserDB(Base):
     __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    email = Column(String, unique=True, index=True)
+    phone = Column(String)
+    linkedin = Column(String)
+    use_case = Column(String)
+    partnerships = relationship("PartnershipsDB", uselist=False)
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(String, index=True)
-    email: Mapped[str] = mapped_column(String, unique=True, index=True)
-    phone: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    linkedin: Mapped[Optional[str]] = mapped_column(String, nullable=True)
-    use_case: Mapped[str] = mapped_column(Text)
-    early_adopter: Mapped[bool] = mapped_column(Boolean, default=False)
-    tech_partner: Mapped[bool] = mapped_column(Boolean, default=False)
-    cofounder: Mapped[bool] = mapped_column(Boolean, default=False)
-    investor: Mapped[bool] = mapped_column(Boolean, default=False)
-
-# Create tables
 Base.metadata.create_all(bind=engine)
 
+# Pydantic schemas
+class Partnerships(BaseModel):
+    earlyAdopter: bool
+    techPartner: bool
+    cofounder: bool
+    investor: bool
+
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    phone: str
+    linkedin: str
+    useCase: str
+    partnerships: Partnerships
+
+# CRUD operations
+def create_user(db: Session, user: UserCreate):
+    db_partnerships = PartnershipsDB(**user.partnerships.dict())
+    db_user = UserDB(
+        name=user.name,
+        email=user.email,
+        phone=user.phone,
+        linkedin=user.linkedin,
+        use_case=user.useCase,
+        partnerships=db_partnerships
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+# FastAPI app
+app = FastAPI()
+
 @app.get("/")
-async def placeholder():
+def root():
     return "200"
 
-
 @app.post("/api/signup")
-async def signup(
-    name: str = Form(...),
-    email: EmailStr = Form(...),
-    phone: Optional[str] = Form(None),
-    linkedin: Optional[str] = Form(None),
-    use_case: str = Form(...),
-    early_adopter: bool = Form(False),
-    tech_partner: bool = Form(False),
-    cofounder: bool = Form(False),
-    investor: bool = Form(False),
-):
-    signup_data = SignUpModel(
-        name=name,
-        email=email,
-        phone=phone,
-        linkedin=linkedin,
-        use_case=use_case,
-        early_adopter=early_adopter,
-        tech_partner=tech_partner,
-        cofounder=cofounder,
-        investor=investor,
-    )
-
-    # Save data to the database
-    db = SessionLocal()
-    user = User(**signup_data.dict())
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    db.close()
-
-    return {"message": "Signup successful"}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+def signup(user: UserCreate, db: Session = Depends(get_db)):
+    try:
+        db_user = create_user(db, user)
+        return {"message": "Signup successful", "id": db_user.id}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
