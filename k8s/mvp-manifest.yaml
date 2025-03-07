@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cerebros-landing-page
-        image: davidt101/cerebros-03-2025-landing-page:dev-0009
+        image: davidt101/cerebros-03-2025-landing-page:dev-0010
         ports:
         - containerPort: 5173
         resources:
