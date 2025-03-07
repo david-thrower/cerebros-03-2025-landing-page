@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cerebros-landing-page
-        image: davidt101/cerebros-03-2025-landing-page:dev-0006
+        image: davidt101/cerebros-03-2025-landing-page:dev-0007
         ports:
         - containerPort: 5173
         resources:
@@ -34,6 +34,6 @@ spec:
     app: cerebros-landing-page
   ports:
     - protocol: TCP
-      port: 80
+      port: 5000
       targetPort: 5173
   type: ClusterIP
