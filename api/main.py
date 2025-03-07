@@ -1,10 +1,9 @@
-
+from sqlalchemy.orm import registry, mapped_column, Mapped
 from fastapi import FastAPI, Form
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Text
+from sqlalchemy import create_engine, Integer, String, Boolean, Text
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 
 app = FastAPI()
 
@@ -12,9 +11,10 @@ app = FastAPI()
 database_url = "sqlite:///./test.db"
 engine = create_engine(database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+mapper_registry = registry()
+Base = mapper_registry.generate_base()
 
-# Pydantic models
+# Pydantic model
 class SignUpModel(BaseModel):
     name: str
     email: EmailStr
@@ -30,17 +30,18 @@ class SignUpModel(BaseModel):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
-    phone = Column(String)
-    linkedin = Column(String)
-    use_case = Column(Text)
-    early_adopter = Column(Boolean, default=False)
-    tech_partner = Column(Boolean, default=False)
-    cofounder = Column(Boolean, default=False)
-    investor = Column(Boolean, default=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, index=True)
+    email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    phone: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    linkedin: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    use_case: Mapped[str] = mapped_column(Text)
+    early_adopter: Mapped[bool] = mapped_column(Boolean, default=False)
+    tech_partner: Mapped[bool] = mapped_column(Boolean, default=False)
+    cofounder: Mapped[bool] = mapped_column(Boolean, default=False)
+    investor: Mapped[bool] = mapped_column(Boolean, default=False)
 
+# Create tables
 Base.metadata.create_all(bind=engine)
 
 @app.post("/signup")
@@ -73,8 +74,10 @@ async def signup(
     db.add(user)
     db.commit()
     db.refresh(user)
+    db.close()
 
     return {"message": "Signup successful"}
 
 if __name__ == "__main__":
+    import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
