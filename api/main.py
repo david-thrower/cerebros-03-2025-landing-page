@@ -44,6 +44,11 @@ class User(Base):
 # Create tables
 Base.metadata.create_all(bind=engine)
 
+@app.get("/")
+async def placeholder():
+    return "200"
+
+
 @app.post("/signup")
 async def signup(
     name: str = Form(...),
