@@ -83,7 +83,7 @@ kind: Ingress
 metadata:
   name: cerebros-landing-page-ingress
   annotations:
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: gce
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
