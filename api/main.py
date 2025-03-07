@@ -49,7 +49,7 @@ async def placeholder():
     return "200"
 
 
-@app.post("/signup")
+@app.post("/api/signup")
 async def signup(
     name: str = Form(...),
     email: EmailStr = Form(...),
