@@ -57,6 +57,9 @@ spec:
         image: davidt101/cerebros-03-2025-landing-page-apis:dev-0012
         ports:
         - containerPort: 8000
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "[db password]"
         resources:
           requests:
             cpu: 250m
