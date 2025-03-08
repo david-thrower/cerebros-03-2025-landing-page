@@ -3,15 +3,24 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy import create_engine, String, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from os import getenv
+
+POSTGRES_PASSWORD = getenv("POSTGRES_PASSWORD")
 
 # SQLAlchemy 2.0 base class
 class Base(DeclarativeBase):
     pass
 
 # Database setup
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+
+# SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+# engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:{POSTGRES_PASSWORD}@postgres-service.landingpage.svc.cluster.local:5432/postgres"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 # Minimal ORM model
 class UserDB(Base):
