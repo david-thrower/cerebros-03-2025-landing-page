@@ -81,6 +81,18 @@ spec:
       targetPort: 8000
   type: ClusterIP
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Mi
+  storageClassName: standard
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
