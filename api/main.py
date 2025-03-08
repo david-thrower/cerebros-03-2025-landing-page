@@ -1,40 +1,42 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from sqlalchemy import create_engine, Column, Integer, String, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, String, Boolean
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
-# Minimal database setup
+# SQLAlchemy 2.0 base class
+class Base(DeclarativeBase):
+    pass
+
+# Database setup
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
-# Simple ORM model
+# Minimal ORM model
 class UserDB(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    email = Column(String)
-    phone = Column(String, nullable=True)
-    linkedin = Column(String, nullable=True)
-    use_case = Column(String)
-    early_adopter = Column(Boolean)
-    tech_partner = Column(Boolean)
-    cofounder = Column(Boolean)
-    investor = Column(Boolean)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(50))
+    email: Mapped[str] = mapped_column(String(100))
+    phone: Mapped[Optional[str]] = mapped_column(String(20))
+    linkedin: Mapped[Optional[str]] = mapped_column(String(100))
+    use_case: Mapped[str] = mapped_column(String(50))
+    early_adopter: Mapped[bool]
+    tech_partner: Mapped[bool]
+    cofounder: Mapped[bool]
+    investor: Mapped[bool]
 
 Base.metadata.create_all(bind=engine)
 
-# Simplified Pydantic model
+# Pydantic model
 class UserCreate(BaseModel):
     name: str
     email: str
     phone: Optional[str] = None
     linkedin: Optional[str] = None
     useCase: str
-    partnerships: dict  # Accept raw dict instead of nested model
+    partnerships: dict
 
 app = FastAPI()
 
@@ -45,7 +47,6 @@ def health_check():
 @app.post("/api/signup")
 def signup(user: UserCreate):
     try:
-        # Direct database insertion without ORM
         with SessionLocal() as db:
             db_user = UserDB(
                 name=user.name,
@@ -62,4 +63,4 @@ def signup(user: UserCreate):
             db.commit()
         return {"message": "Signup successful"}
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=400, detail=str(e))
