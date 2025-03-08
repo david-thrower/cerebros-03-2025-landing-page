@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cerebros-landing-page
-        image: davidt101/cerebros-03-2025-landing-page:dev-0007
+        image: davidt101/cerebros-03-2025-landing-page:dev-0010
         ports:
         - containerPort: 5173
         resources:
@@ -54,7 +54,7 @@ spec:
     spec:
       containers:
       - name: cerebros-landing-page-api
-        image: davidt101/cerebros-03-2025-landing-page-apis:dev-0005
+        image: davidt101/cerebros-03-2025-landing-page-apis:dev-0012
         ports:
         - containerPort: 8000
         resources:
@@ -77,3 +77,28 @@ spec:
       port: 8000
       targetPort: 8000
   type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cerebros-landing-page-ingress
+  annotations:
+    kubernetes.io/ingress.class: gce
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: cerebros-landing-page-api-service
+            port: 
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cerebros-landing-page-service
+            port: 
+              number: 5000
