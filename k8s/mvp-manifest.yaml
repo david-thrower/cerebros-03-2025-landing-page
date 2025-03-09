@@ -67,7 +67,7 @@ spec:
         - containerPort: 8000
         env:
         - name: POSTGRES_PASSWORD
-          value: "[db password]"
+          value: "[PLACEHOLDER]"
         resources:
           requests:
             cpu: 250m
@@ -125,10 +125,10 @@ spec:
         - containerPort: 5432
         env:
         - name: POSTGRES_PASSWORD
-          value: "[db password]"
+          value: "[PLACEHOLDER]"
         volumeMounts:
         - name: postgres-storage
-          mountPath: /var/lib/postgresql/data
+          mountPath: /var/lib/postgresql
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
@@ -151,7 +151,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cerebros-landing-page-api-ingress
+  name: cerebros-landing-ingress-v2
   annotations:
     kubernetes.io/ingress.global-static-ip-name: my-static-ip
     networking.gke.io/managed-certificates: managed-cert
@@ -165,9 +165,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: my-api-service
-            port: 
-              number: 80
+            name: cerebros-landing-page-api-service
+            port:
+              number: 8000
 ---
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
