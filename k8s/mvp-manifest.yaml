@@ -151,25 +151,28 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cerebros-landing-page-ingress
-  namespace: landingpage
+  name: cerebros-landing-page-api-ingress
   annotations:
-    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.global-static-ip-name: my-static-ip
+    networking.gke.io/managed-certificates: managed-cert
+    kubernetes.io/ingress.class: "gce"
 spec:
   rules:
-  - http:
+  - host: devcerebroslandingpageapis.xyz
+    http:
       paths:
       - path: /api
         pathType: Prefix
         backend:
           service:
-            name: cerebros-landing-page-api-service
+            name: my-api-service
             port: 
-              number: 8000
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: cerebros-landing-page-service
-            port: 
-              number: 5000
+              number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: managed-cert
+spec:
+  domains:
+    - devcerebroslandingpageapis.xyz
