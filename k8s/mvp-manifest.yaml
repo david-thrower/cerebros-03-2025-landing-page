@@ -152,6 +152,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: cerebros-landing-ingress-v2
+  namespace: landingpage
   annotations:
     kubernetes.io/ingress.global-static-ip-name: my-static-ip
     networking.gke.io/managed-certificates: managed-cert
@@ -173,6 +174,7 @@ apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
 metadata:
   name: managed-cert
+  namespace: landingpage
 spec:
   domains:
     - devcerebroslandingpageapis.xyz
