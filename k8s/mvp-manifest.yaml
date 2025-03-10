@@ -119,7 +119,7 @@ spec:
   - host: devcerebroslandingspageapis.com
     http:
       paths:
-      - path: /api
+      - path: /
         pathType: Prefix
         backend:
           service:
