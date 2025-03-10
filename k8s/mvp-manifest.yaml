@@ -158,7 +158,7 @@ metadata:
     kubernetes.io/ingress.class: "gce"
 spec:
   rules:
-  - host: devcerebroslandingpageapis.xyz
+  - host: devcerebroslandingspageapis.com
     http:
       paths:
       - path: /api
@@ -176,4 +176,4 @@ metadata:
   namespace: landingpage
 spec:
   domains:
-    - devcerebroslandingpageapis.xyz
+    - devcerebroslandingspageapis.com
