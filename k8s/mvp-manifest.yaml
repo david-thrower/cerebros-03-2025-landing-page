@@ -154,7 +154,6 @@ metadata:
   name: cerebros-landing-ingress-v2
   namespace: landingpage
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: my-static-ip
     networking.gke.io/managed-certificates: managed-cert
     kubernetes.io/ingress.class: "gce"
 spec:
