@@ -6,48 +6,6 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cerebros-landing-page
-  namespace: landingpage
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: cerebros-landing-page
-  template:
-    metadata:
-      labels:
-        app: cerebros-landing-page
-    spec:
-      containers:
-      - name: cerebros-landing-page
-        image: davidt101/cerebros-03-2025-landing-page:dev-0010
-        ports:
-        - containerPort: 5173
-        resources:
-          requests:
-            cpu: 250m
-            memory: 512Mi
-          limits:
-            cpu: 500m
-            memory: 1Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: cerebros-landing-page-service
-  namespace: landingpage
-spec:
-  selector:
-    app: cerebros-landing-page
-  ports:
-    - protocol: TCP
-      port: 5000
-      targetPort: 5173
-  type: ClusterIP
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: cerebros-landing-page-api
   namespace: landingpage
 spec:
