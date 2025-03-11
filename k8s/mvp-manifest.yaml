@@ -6,48 +6,6 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cerebros-landing-page
-  namespace: landingpage
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: cerebros-landing-page
-  template:
-    metadata:
-      labels:
-        app: cerebros-landing-page
-    spec:
-      containers:
-      - name: cerebros-landing-page
-        image: davidt101/cerebros-03-2025-landing-page:dev-0010
-        ports:
-        - containerPort: 5173
-        resources:
-          requests:
-            cpu: 250m
-            memory: 512Mi
-          limits:
-            cpu: 500m
-            memory: 1Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: cerebros-landing-page-service
-  namespace: landingpage
-spec:
-  selector:
-    app: cerebros-landing-page
-  ports:
-    - protocol: TCP
-      port: 5000
-      targetPort: 5173
-  type: ClusterIP
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: cerebros-landing-page-api
   namespace: landingpage
 spec:
@@ -67,7 +25,7 @@ spec:
         - containerPort: 8000
         env:
         - name: POSTGRES_PASSWORD
-          value: "[db password]"
+          value: "[PLACEHOLDER]"
         resources:
           requests:
             cpu: 250m
@@ -125,10 +83,10 @@ spec:
         - containerPort: 5432
         env:
         - name: POSTGRES_PASSWORD
-          value: "[db password]"
+          value: "[PLACEHOLDER]"
         volumeMounts:
         - name: postgres-storage
-          mountPath: /var/lib/postgresql/data
+          mountPath: /var/lib/postgresql
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
@@ -151,25 +109,29 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cerebros-landing-page-ingress
+  name: cerebros-landing-ingress-v2
   namespace: landingpage
   annotations:
-    kubernetes.io/ingress.class: gce
+    networking.gke.io/managed-certificates: managed-cert
+    kubernetes.io/ingress.class: "gce"
 spec:
   rules:
-  - http:
+  - host: devcerebroslandingspageapis.com
+    http:
       paths:
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: cerebros-landing-page-api-service
-            port: 
-              number: 8000
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: cerebros-landing-page-service
-            port: 
-              number: 5000
+            name: cerebros-landing-page-api-service
+            port:
+              number: 8000
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: managed-cert
+  namespace: landingpage
+spec:
+  domains:
+    - devcerebroslandingspageapis.com
