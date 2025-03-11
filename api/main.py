@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy import create_engine, String, Boolean
@@ -48,6 +49,15 @@ class UserCreate(BaseModel):
     partnerships: dict
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://cerebros.one"],  # Specific frontend origin
+    allow_methods=["POST", "OPTIONS"],        # Required methods
+    allow_headers=["Content-Type", "Accept"], # Needed for JSON requests
+    expose_headers=["Access-Control-Allow-Origin"],  # Make visible to browsers
+    max_age=600                                # Cache preflight response
+)
 
 @app.get("/")
 def health_check():
