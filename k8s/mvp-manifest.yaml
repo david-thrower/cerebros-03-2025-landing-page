@@ -84,6 +84,8 @@ spec:
         env:
         - name: POSTGRES_PASSWORD
           value: "[PLACEHOLDER]"
+        - name: PGDATA
+          value: /var/lib/postgresql/data
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql
