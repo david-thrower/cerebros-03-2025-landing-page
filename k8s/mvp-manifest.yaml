@@ -85,10 +85,10 @@ spec:
         - name: POSTGRES_PASSWORD
           value: "[PLACEHOLDER]"
         - name: PGDATA
-          value: /var/lib/postgresql/data
+          value: /var/lib/postgresql/data/pgdata
         volumeMounts:
         - name: postgres-storage
-          mountPath: /var/lib/postgresql
+          mountPath: /var/lib/postgresql/data
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
