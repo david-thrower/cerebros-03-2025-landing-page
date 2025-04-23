@@ -19,8 +19,12 @@ class Base(DeclarativeBase):
 # SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:{POSTGRES_PASSWORD}@postgres-service.landingpage.svc.cluster.local:5432/postgres"
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
+SessionLocal =\
+        sessionmaker(
+                autocommit=False,
+                autoflush=False,
+                bind=engine)
 
 
 # Minimal ORM model
@@ -37,7 +41,11 @@ class UserDB(Base):
     cofounder: Mapped[bool]
     investor: Mapped[bool]
 
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+    print("Tables created successfully")
+except Exception as e:
+    print(f"Error creating tables: {e}")
 
 # Pydantic model
 class UserCreate(BaseModel):
