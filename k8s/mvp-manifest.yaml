@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: cerebros-landing-page-api
-        image: davidt101/cerebros-03-2025-landing-page-apis:dev-0015
+        image: davidt101/cerebros-03-2025-landing-page-apis:dev-0016
         ports:
         - containerPort: 8000
         env:
